@@ -1,5 +1,5 @@
-# Binaries
-extend-mcp-server
+# Binaries (root only, not cmd/extend-mcp-server/)
+/extend-mcp-server
 dist/
 *.exe
 *.exe~
