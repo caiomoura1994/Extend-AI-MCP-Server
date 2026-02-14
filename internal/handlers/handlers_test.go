@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/caiomoura/extend-mcp-server/internal/handlers"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -18,7 +18,7 @@ var testImpl = &mcp.Implementation{Name: "test-server", Version: "0.0.1"}
 func setupServer(t *testing.T) *mcp.ClientSession {
 	t.Helper()
 
-	c := client.NewClient("https://api.extend.ai", "invalid_key", "2025-04-21")
+	c := repositories.NewClient("https://api.extend.ai", "invalid_key", "2025-04-21")
 
 	extractorH := handlers.NewExtractorHandlers(c)
 	processorH := handlers.NewProcessorHandlers(c)

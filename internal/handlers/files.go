@@ -4,23 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/dto"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // FileHandlers contains all file-related MCP handlers
 type FileHandlers struct {
-	client *client.Client
+	client *repositories.Client
 }
 
 // NewFileHandlers creates a new file handlers instance
-func NewFileHandlers(c *client.Client) *FileHandlers {
+func NewFileHandlers(c *repositories.Client) *FileHandlers {
 	return &FileHandlers{client: c}
 }
 
 // ListFilesOutput wraps the files list
 type ListFilesOutput struct {
-	Files []client.File `json:"files"`
+	Files []dto.File `json:"files"`
 }
 
 // HandleListFiles handles the list_files tool call
@@ -33,7 +34,7 @@ func (h *FileHandlers) HandleListFiles(ctx context.Context, req *mcp.CallToolReq
 
 	// Ensure non-nil slice
 	if result == nil {
-		result = []client.File{}
+		result = []dto.File{}
 	}
 	return nil, &ListFilesOutput{Files: result}, nil
 }

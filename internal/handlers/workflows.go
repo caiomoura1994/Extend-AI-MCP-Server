@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/dto"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // WorkflowHandlers contains all workflow-related MCP handlers
 type WorkflowHandlers struct {
-	client *client.Client
+	client *repositories.Client
 }
 
 // NewWorkflowHandlers creates a new workflow handlers instance
-func NewWorkflowHandlers(c *client.Client) *WorkflowHandlers {
+func NewWorkflowHandlers(c *repositories.Client) *WorkflowHandlers {
 	return &WorkflowHandlers{client: c}
 }
 
@@ -24,7 +25,7 @@ type GetWorkflowRunInput struct {
 }
 
 // HandleGetWorkflowRun handles the get_workflow_run tool call
-func (h *WorkflowHandlers) HandleGetWorkflowRun(ctx context.Context, req *mcp.CallToolRequest, input GetWorkflowRunInput) (*mcp.CallToolResult, *client.WorkflowRun, error) {
+func (h *WorkflowHandlers) HandleGetWorkflowRun(ctx context.Context, req *mcp.CallToolRequest, input GetWorkflowRunInput) (*mcp.CallToolResult, *dto.WorkflowRun, error) {
 	// Validate
 	if input.RunID == "" {
 		return nil, nil, fmt.Errorf("run_id is required")
@@ -42,7 +43,7 @@ func (h *WorkflowHandlers) HandleGetWorkflowRun(ctx context.Context, req *mcp.Ca
 
 // ListWorkflowRunsOutput wraps the workflow runs list
 type ListWorkflowRunsOutput struct {
-	WorkflowRuns []client.WorkflowRunSummary `json:"workflow_runs"`
+	WorkflowRuns []dto.WorkflowRunSummary `json:"workflow_runs"`
 }
 
 // HandleListWorkflowRuns handles the list_workflow_runs tool call
@@ -55,14 +56,14 @@ func (h *WorkflowHandlers) HandleListWorkflowRuns(ctx context.Context, req *mcp.
 
 	// Ensure non-nil slice
 	if result == nil {
-		result = []client.WorkflowRunSummary{}
+		result = []dto.WorkflowRunSummary{}
 	}
 	return nil, &ListWorkflowRunsOutput{WorkflowRuns: result}, nil
 }
 
 // ListWorkflowsOutput wraps the workflows list
 type ListWorkflowsOutput struct {
-	Workflows []client.Workflow `json:"workflows"`
+	Workflows []dto.Workflow `json:"workflows"`
 }
 
 // HandleListWorkflows handles the list_workflows tool call
@@ -75,7 +76,7 @@ func (h *WorkflowHandlers) HandleListWorkflows(ctx context.Context, req *mcp.Cal
 
 	// Ensure non-nil slice (MCP SDK requires array, not null)
 	if result == nil {
-		result = []client.Workflow{}
+		result = []dto.Workflow{}
 	}
 	return nil, &ListWorkflowsOutput{Workflows: result}, nil
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/caiomoura/extend-mcp-server/internal/config"
 	"github.com/caiomoura/extend-mcp-server/internal/handlers"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -40,7 +40,7 @@ func isCategoryEnabled(cfg *config.Config, category ToolCategory) bool {
 }
 
 // RegisterAllTools registers all read-only MCP tools based on configuration
-func RegisterAllTools(server *mcp.Server, cfg *config.Config, extendClient *client.Client) int {
+func RegisterAllTools(server *mcp.Server, cfg *config.Config, extendClient *repositories.Client) int {
 	// Create handlers
 	processorHandlers := handlers.NewProcessorHandlers(extendClient)
 	workflowHandlers := handlers.NewWorkflowHandlers(extendClient)

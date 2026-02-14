@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/dto"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // ParseHandlers contains all parse-related MCP handlers
 type ParseHandlers struct {
-	client *client.Client
+	client *repositories.Client
 }
 
 // NewParseHandlers creates a new parse handlers instance
-func NewParseHandlers(c *client.Client) *ParseHandlers {
+func NewParseHandlers(c *repositories.Client) *ParseHandlers {
 	return &ParseHandlers{client: c}
 }
 
@@ -24,7 +25,7 @@ type GetParseRunInput struct {
 }
 
 // HandleGetParseRun handles the get_parse_run tool call
-func (h *ParseHandlers) HandleGetParseRun(ctx context.Context, req *mcp.CallToolRequest, input GetParseRunInput) (*mcp.CallToolResult, *client.ParserRun, error) {
+func (h *ParseHandlers) HandleGetParseRun(ctx context.Context, req *mcp.CallToolRequest, input GetParseRunInput) (*mcp.CallToolResult, *dto.ParserRun, error) {
 	// Validate
 	if input.RunID == "" {
 		return nil, nil, fmt.Errorf("run_id is required")

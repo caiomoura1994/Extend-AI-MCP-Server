@@ -4,23 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/dto"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // ExtractorHandlers contains all extractor-related MCP handlers
 type ExtractorHandlers struct {
-	client *client.Client
+	client *repositories.Client
 }
 
 // NewExtractorHandlers creates a new extractor handlers instance
-func NewExtractorHandlers(c *client.Client) *ExtractorHandlers {
+func NewExtractorHandlers(c *repositories.Client) *ExtractorHandlers {
 	return &ExtractorHandlers{client: c}
 }
 
 // ListExtractRunsOutput wraps the extract runs list
 type ListExtractRunsOutput struct {
-	ExtractRuns []client.ExtractRun `json:"extract_runs"`
+	ExtractRuns []dto.ExtractRun `json:"extract_runs"`
 }
 
 // HandleListExtractRuns handles the list_extract_runs tool call
@@ -33,7 +34,7 @@ func (h *ExtractorHandlers) HandleListExtractRuns(ctx context.Context, req *mcp.
 
 	// Ensure non-nil slice (MCP SDK requires array, not null)
 	if result == nil {
-		result = []client.ExtractRun{}
+		result = []dto.ExtractRun{}
 	}
 	return nil, &ListExtractRunsOutput{ExtractRuns: result}, nil
 }
@@ -44,7 +45,7 @@ type GetExtractorInput struct {
 }
 
 // HandleGetExtractor handles the get_extractor tool call
-func (h *ExtractorHandlers) HandleGetExtractor(ctx context.Context, req *mcp.CallToolRequest, input GetExtractorInput) (*mcp.CallToolResult, *client.Extractor, error) {
+func (h *ExtractorHandlers) HandleGetExtractor(ctx context.Context, req *mcp.CallToolRequest, input GetExtractorInput) (*mcp.CallToolResult, *dto.Extractor, error) {
 	// Validate
 	if input.ExtractorID == "" {
 		return nil, nil, fmt.Errorf("extractor_id is required")
@@ -62,7 +63,7 @@ func (h *ExtractorHandlers) HandleGetExtractor(ctx context.Context, req *mcp.Cal
 
 // ListExtractorsOutput wraps the extractors list
 type ListExtractorsOutput struct {
-	Extractors []client.Extractor `json:"extractors"`
+	Extractors []dto.Extractor `json:"extractors"`
 }
 
 // HandleListExtractors handles the list_extractors tool call
@@ -75,7 +76,7 @@ func (h *ExtractorHandlers) HandleListExtractors(ctx context.Context, req *mcp.C
 
 	// Ensure non-nil slice (MCP SDK requires array, not null)
 	if result == nil {
-		result = []client.Extractor{}
+		result = []dto.Extractor{}
 	}
 	return nil, &ListExtractorsOutput{Extractors: result}, nil
 }
@@ -87,7 +88,7 @@ type GetExtractorVersionInput struct {
 }
 
 // HandleGetExtractorVersion handles the get_extractor_version tool call
-func (h *ExtractorHandlers) HandleGetExtractorVersion(ctx context.Context, req *mcp.CallToolRequest, input GetExtractorVersionInput) (*mcp.CallToolResult, *client.ExtractorVersion, error) {
+func (h *ExtractorHandlers) HandleGetExtractorVersion(ctx context.Context, req *mcp.CallToolRequest, input GetExtractorVersionInput) (*mcp.CallToolResult, *dto.ExtractorVersion, error) {
 	// Validate
 	if input.ExtractorID == "" {
 		return nil, nil, fmt.Errorf("extractor_id is required")
@@ -113,7 +114,7 @@ type ListExtractorVersionsInput struct {
 
 // ListExtractorVersionsOutput wraps the extractor versions list
 type ListExtractorVersionsOutput struct {
-	Versions []client.ExtractorVersion `json:"versions"`
+	Versions []dto.ExtractorVersion `json:"versions"`
 }
 
 // HandleListExtractorVersions handles the list_extractor_versions tool call
@@ -131,7 +132,7 @@ func (h *ExtractorHandlers) HandleListExtractorVersions(ctx context.Context, req
 
 	// Ensure non-nil slice (MCP SDK requires array, not null)
 	if result == nil {
-		result = []client.ExtractorVersion{}
+		result = []dto.ExtractorVersion{}
 	}
 	return nil, &ListExtractorVersionsOutput{Versions: result}, nil
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/caiomoura/extend-mcp-server/internal/config"
 	"github.com/caiomoura/extend-mcp-server/internal/registry"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -18,7 +18,7 @@ func main() {
 	}
 
 	// Create Extend API client
-	extendClient := client.NewClient(cfg.BaseURL, cfg.APIKey, cfg.APIVersion)
+	extendClient := repositories.NewClient(cfg.BaseURL, cfg.APIKey, cfg.APIVersion)
 
 	// Create MCP server
 	impl := &mcp.Implementation{

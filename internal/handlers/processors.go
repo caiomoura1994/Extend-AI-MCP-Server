@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caiomoura/extend-mcp-server/internal/client"
+	"github.com/caiomoura/extend-mcp-server/internal/dto"
+	"github.com/caiomoura/extend-mcp-server/internal/repositories"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // ProcessorHandlers contains all processor-related MCP handlers
 type ProcessorHandlers struct {
-	client *client.Client
+	client *repositories.Client
 }
 
 // NewProcessorHandlers creates a new processor handlers instance
-func NewProcessorHandlers(c *client.Client) *ProcessorHandlers {
+func NewProcessorHandlers(c *repositories.Client) *ProcessorHandlers {
 	return &ProcessorHandlers{client: c}
 }
 
@@ -24,7 +25,7 @@ type GetProcessorRunInput struct {
 }
 
 // HandleGetProcessorRun handles the get_processor_run tool call
-func (h *ProcessorHandlers) HandleGetProcessorRun(ctx context.Context, req *mcp.CallToolRequest, input GetProcessorRunInput) (*mcp.CallToolResult, *client.ProcessorRun, error) {
+func (h *ProcessorHandlers) HandleGetProcessorRun(ctx context.Context, req *mcp.CallToolRequest, input GetProcessorRunInput) (*mcp.CallToolResult, *dto.ProcessorRun, error) {
 	// Validate
 	if input.RunID == "" {
 		return nil, nil, fmt.Errorf("run_id is required")
@@ -42,7 +43,7 @@ func (h *ProcessorHandlers) HandleGetProcessorRun(ctx context.Context, req *mcp.
 
 // ListProcessorsOutput wraps the processors list
 type ListProcessorsOutput struct {
-	Processors []client.Processor `json:"processors"`
+	Processors []dto.Processor `json:"processors"`
 }
 
 // HandleListProcessors handles the list_processors tool call
@@ -55,7 +56,7 @@ func (h *ProcessorHandlers) HandleListProcessors(ctx context.Context, req *mcp.C
 
 	// Ensure non-nil slice (MCP SDK requires array, not null)
 	if result == nil {
-		result = []client.Processor{}
+		result = []dto.Processor{}
 	}
 	return nil, &ListProcessorsOutput{Processors: result}, nil
 }
