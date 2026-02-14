@@ -26,9 +26,10 @@ func (c *Client) GetProcessorRun(ctx context.Context, runID string) (*dto.Proces
 	return &result.ProcessorRun, nil
 }
 
-// ListProcessors retrieves all available processors
-func (c *Client) ListProcessors(ctx context.Context) ([]dto.Processor, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/processors", nil)
+// ListProcessors retrieves available processors with optional pagination
+func (c *Client) ListProcessors(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListProcessorsResponse, error) {
+	path := "/processors" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -39,5 +40,5 @@ func (c *Client) ListProcessors(ctx context.Context) ([]dto.Processor, error) {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Processors, nil
+	return &result, nil
 }

@@ -26,57 +26,88 @@ type GetWorkflowRunInput struct {
 
 // HandleGetWorkflowRun handles the get_workflow_run tool call
 func (h *WorkflowHandlers) HandleGetWorkflowRun(ctx context.Context, req *mcp.CallToolRequest, input GetWorkflowRunInput) (*mcp.CallToolResult, *dto.WorkflowRun, error) {
-	// Validate
 	if input.RunID == "" {
 		return nil, nil, fmt.Errorf("run_id is required")
 	}
 
-	// Call API
 	result, err := h.client.GetWorkflowRun(ctx, input.RunID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get workflow run: %w", err)
 	}
 
-	// Return result
 	return nil, result, nil
 }
 
-// ListWorkflowRunsOutput wraps the workflow runs list
+// ListWorkflowRunsInput defines the input schema for list_workflow_runs tool
+type ListWorkflowRunsInput struct {
+	MaxPageSize   *int    `json:"max_page_size,omitempty" jsonschema:"Maximum number of items per page (default: 10)"`
+	NextPageToken *string `json:"next_page_token,omitempty" jsonschema:"Token for the next page of results"`
+	SortBy        *string `json:"sort_by,omitempty" jsonschema:"Sort by field: updatedAt or createdAt (default: updatedAt)"`
+	SortDir       *string `json:"sort_dir,omitempty" jsonschema:"Sort direction: asc or desc (default: desc)"`
+}
+
+// ListWorkflowRunsOutput wraps the workflow runs list with pagination
 type ListWorkflowRunsOutput struct {
-	WorkflowRuns []dto.WorkflowRunSummary `json:"workflow_runs"`
+	WorkflowRuns  []dto.WorkflowRunSummary `json:"workflow_runs"`
+	NextPageToken *string                  `json:"next_page_token,omitempty"`
 }
 
 // HandleListWorkflowRuns handles the list_workflow_runs tool call
-func (h *WorkflowHandlers) HandleListWorkflowRuns(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, *ListWorkflowRunsOutput, error) {
-	// Call API
-	result, err := h.client.ListWorkflowRuns(ctx)
+func (h *WorkflowHandlers) HandleListWorkflowRuns(ctx context.Context, req *mcp.CallToolRequest, input ListWorkflowRunsInput) (*mcp.CallToolResult, *ListWorkflowRunsOutput, error) {
+	pagination := &dto.PaginationParams{
+		MaxPageSize:   input.MaxPageSize,
+		NextPageToken: input.NextPageToken,
+		SortBy:        input.SortBy,
+		SortDir:       input.SortDir,
+	}
+
+	result, err := h.client.ListWorkflowRuns(ctx, pagination)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to list workflow runs: %w", err)
 	}
 
-	// Ensure non-nil slice
-	if result == nil {
-		result = []dto.WorkflowRunSummary{}
+	if result.WorkflowRuns == nil {
+		result.WorkflowRuns = []dto.WorkflowRunSummary{}
 	}
-	return nil, &ListWorkflowRunsOutput{WorkflowRuns: result}, nil
+	return nil, &ListWorkflowRunsOutput{
+		WorkflowRuns:  result.WorkflowRuns,
+		NextPageToken: result.NextPageToken,
+	}, nil
 }
 
-// ListWorkflowsOutput wraps the workflows list
+// ListWorkflowsInput defines the input schema for list_workflows tool
+type ListWorkflowsInput struct {
+	MaxPageSize   *int    `json:"max_page_size,omitempty" jsonschema:"Maximum number of items per page (default: 10)"`
+	NextPageToken *string `json:"next_page_token,omitempty" jsonschema:"Token for the next page of results"`
+	SortBy        *string `json:"sort_by,omitempty" jsonschema:"Sort by field: updatedAt or createdAt (default: updatedAt)"`
+	SortDir       *string `json:"sort_dir,omitempty" jsonschema:"Sort direction: asc or desc (default: desc)"`
+}
+
+// ListWorkflowsOutput wraps the workflows list with pagination
 type ListWorkflowsOutput struct {
-	Workflows []dto.Workflow `json:"workflows"`
+	Workflows     []dto.Workflow `json:"workflows"`
+	NextPageToken *string        `json:"next_page_token,omitempty"`
 }
 
 // HandleListWorkflows handles the list_workflows tool call
-func (h *WorkflowHandlers) HandleListWorkflows(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, *ListWorkflowsOutput, error) {
-	// Call API
-	result, err := h.client.ListWorkflows(ctx)
+func (h *WorkflowHandlers) HandleListWorkflows(ctx context.Context, req *mcp.CallToolRequest, input ListWorkflowsInput) (*mcp.CallToolResult, *ListWorkflowsOutput, error) {
+	pagination := &dto.PaginationParams{
+		MaxPageSize:   input.MaxPageSize,
+		NextPageToken: input.NextPageToken,
+		SortBy:        input.SortBy,
+		SortDir:       input.SortDir,
+	}
+
+	result, err := h.client.ListWorkflows(ctx, pagination)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to list workflows: %w", err)
 	}
 
-	// Ensure non-nil slice (MCP SDK requires array, not null)
-	if result == nil {
-		result = []dto.Workflow{}
+	if result.Workflows == nil {
+		result.Workflows = []dto.Workflow{}
 	}
-	return nil, &ListWorkflowsOutput{Workflows: result}, nil
+	return nil, &ListWorkflowsOutput{
+		Workflows:     result.Workflows,
+		NextPageToken: result.NextPageToken,
+	}, nil
 }

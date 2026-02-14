@@ -26,9 +26,10 @@ func (c *Client) GetWorkflowRun(ctx context.Context, runID string) (*dto.Workflo
 	return &result, nil
 }
 
-// ListWorkflowRuns retrieves all workflow runs
-func (c *Client) ListWorkflowRuns(ctx context.Context) ([]dto.WorkflowRunSummary, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/workflow_runs", nil)
+// ListWorkflowRuns retrieves workflow runs with optional pagination
+func (c *Client) ListWorkflowRuns(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListWorkflowRunsResponse, error) {
+	path := "/workflow_runs" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -39,12 +40,13 @@ func (c *Client) ListWorkflowRuns(ctx context.Context) ([]dto.WorkflowRunSummary
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.WorkflowRuns, nil
+	return &result, nil
 }
 
-// ListWorkflows retrieves all available workflows
-func (c *Client) ListWorkflows(ctx context.Context) ([]dto.Workflow, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/workflows", nil)
+// ListWorkflows retrieves available workflows with optional pagination
+func (c *Client) ListWorkflows(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListWorkflowsResponse, error) {
+	path := "/workflows" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -55,5 +57,5 @@ func (c *Client) ListWorkflows(ctx context.Context) ([]dto.Workflow, error) {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Workflows, nil
+	return &result, nil
 }

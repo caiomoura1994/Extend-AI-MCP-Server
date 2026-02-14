@@ -26,37 +26,51 @@ type GetProcessorRunInput struct {
 
 // HandleGetProcessorRun handles the get_processor_run tool call
 func (h *ProcessorHandlers) HandleGetProcessorRun(ctx context.Context, req *mcp.CallToolRequest, input GetProcessorRunInput) (*mcp.CallToolResult, *dto.ProcessorRun, error) {
-	// Validate
 	if input.RunID == "" {
 		return nil, nil, fmt.Errorf("run_id is required")
 	}
 
-	// Call API
 	result, err := h.client.GetProcessorRun(ctx, input.RunID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get processor run: %w", err)
 	}
 
-	// Return result
 	return nil, result, nil
 }
 
-// ListProcessorsOutput wraps the processors list
+// ListProcessorsInput defines the input schema for list_processors tool
+type ListProcessorsInput struct {
+	MaxPageSize   *int    `json:"max_page_size,omitempty" jsonschema:"Maximum number of items per page (default: 10)"`
+	NextPageToken *string `json:"next_page_token,omitempty" jsonschema:"Token for the next page of results"`
+	SortBy        *string `json:"sort_by,omitempty" jsonschema:"Sort by field: updatedAt or createdAt (default: updatedAt)"`
+	SortDir       *string `json:"sort_dir,omitempty" jsonschema:"Sort direction: asc or desc (default: desc)"`
+}
+
+// ListProcessorsOutput wraps the processors list with pagination
 type ListProcessorsOutput struct {
-	Processors []dto.Processor `json:"processors"`
+	Processors    []dto.Processor `json:"processors"`
+	NextPageToken *string         `json:"next_page_token,omitempty"`
 }
 
 // HandleListProcessors handles the list_processors tool call
-func (h *ProcessorHandlers) HandleListProcessors(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, *ListProcessorsOutput, error) {
-	// Call API
-	result, err := h.client.ListProcessors(ctx)
+func (h *ProcessorHandlers) HandleListProcessors(ctx context.Context, req *mcp.CallToolRequest, input ListProcessorsInput) (*mcp.CallToolResult, *ListProcessorsOutput, error) {
+	pagination := &dto.PaginationParams{
+		MaxPageSize:   input.MaxPageSize,
+		NextPageToken: input.NextPageToken,
+		SortBy:        input.SortBy,
+		SortDir:       input.SortDir,
+	}
+
+	result, err := h.client.ListProcessors(ctx, pagination)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to list processors: %w", err)
 	}
 
-	// Ensure non-nil slice (MCP SDK requires array, not null)
-	if result == nil {
-		result = []dto.Processor{}
+	if result.Processors == nil {
+		result.Processors = []dto.Processor{}
 	}
-	return nil, &ListProcessorsOutput{Processors: result}, nil
+	return nil, &ListProcessorsOutput{
+		Processors:    result.Processors,
+		NextPageToken: result.NextPageToken,
+	}, nil
 }

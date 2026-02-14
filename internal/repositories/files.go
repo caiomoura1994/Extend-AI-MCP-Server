@@ -9,9 +9,10 @@ import (
 	"github.com/caiomoura/extend-mcp-server/internal/dto"
 )
 
-// ListFiles retrieves all files
-func (c *Client) ListFiles(ctx context.Context) ([]dto.File, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/files", nil)
+// ListFiles retrieves files with optional pagination
+func (c *Client) ListFiles(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListFilesResponse, error) {
+	path := "/files" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,5 +23,5 @@ func (c *Client) ListFiles(ctx context.Context) ([]dto.File, error) {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Files, nil
+	return &result, nil
 }

@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -28,8 +27,7 @@ func RegisterAllTools(server *mcp.Server, extendClient *repositories.Client) int
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_processors",
-		Description: "List all available processors",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List available processors. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, processorHandlers.HandleListProcessors)
 
 	// Workflow tools
@@ -40,14 +38,12 @@ func RegisterAllTools(server *mcp.Server, extendClient *repositories.Client) int
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_workflows",
-		Description: "List all available workflows",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List available workflows. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, workflowHandlers.HandleListWorkflows)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_workflow_runs",
-		Description: "List all workflow execution runs with status, timing and metadata",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List workflow execution runs with status, timing and metadata. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, workflowHandlers.HandleListWorkflowRuns)
 
 	// Parse tools
@@ -59,8 +55,7 @@ func RegisterAllTools(server *mcp.Server, extendClient *repositories.Client) int
 	// Extractor tools
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_extract_runs",
-		Description: "List all extractor execution runs",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List extractor execution runs. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, extractorHandlers.HandleListExtractRuns)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -70,8 +65,7 @@ func RegisterAllTools(server *mcp.Server, extendClient *repositories.Client) int
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_extractors",
-		Description: "List all available extractors",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List available extractors. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, extractorHandlers.HandleListExtractors)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -81,14 +75,13 @@ func RegisterAllTools(server *mcp.Server, extendClient *repositories.Client) int
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_extractor_versions",
-		Description: "List all versions of a specific extractor",
+		Description: "List all versions of a specific extractor. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, extractorHandlers.HandleListExtractorVersions)
 
 	// File tools
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_files",
-		Description: "List all files uploaded to the account",
-		InputSchema: json.RawMessage(`{"type": "object"}`),
+		Description: "List files uploaded to the account. Supports pagination via max_page_size (default: 10), next_page_token, sort_by, and sort_dir",
 	}, fileHandlers.HandleListFiles)
 
 	return 12

@@ -9,9 +9,10 @@ import (
 	"github.com/caiomoura/extend-mcp-server/internal/dto"
 )
 
-// ListExtractRuns retrieves all extract runs
-func (c *Client) ListExtractRuns(ctx context.Context) ([]dto.ExtractRun, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/extract_runs", nil)
+// ListExtractRuns retrieves extract runs with optional pagination
+func (c *Client) ListExtractRuns(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListExtractRunsResponse, error) {
+	path := "/extract_runs" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +23,7 @@ func (c *Client) ListExtractRuns(ctx context.Context) ([]dto.ExtractRun, error) 
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Data, nil
+	return &result, nil
 }
 
 // GetExtractor retrieves a specific extractor by ID
@@ -42,9 +43,10 @@ func (c *Client) GetExtractor(ctx context.Context, extractorID string) (*dto.Ext
 	return &result, nil
 }
 
-// ListExtractors retrieves all extractors
-func (c *Client) ListExtractors(ctx context.Context) ([]dto.Extractor, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, "/extractors", nil)
+// ListExtractors retrieves extractors with optional pagination
+func (c *Client) ListExtractors(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListExtractorsResponse, error) {
+	path := "/extractors" + pagination.QueryString()
+	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +57,7 @@ func (c *Client) ListExtractors(ctx context.Context) ([]dto.Extractor, error) {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Data, nil
+	return &result, nil
 }
 
 // GetExtractorVersion retrieves a specific version of an extractor
@@ -75,9 +77,9 @@ func (c *Client) GetExtractorVersion(ctx context.Context, extractorID, versionID
 	return &result, nil
 }
 
-// ListExtractorVersions retrieves all versions of a specific extractor
-func (c *Client) ListExtractorVersions(ctx context.Context, extractorID string) ([]dto.ExtractorVersion, error) {
-	path := fmt.Sprintf("/extractors/%s/versions", extractorID)
+// ListExtractorVersions retrieves versions of a specific extractor with optional pagination
+func (c *Client) ListExtractorVersions(ctx context.Context, extractorID string, pagination *dto.PaginationParams) (*dto.ListExtractorVersionsResponse, error) {
+	path := fmt.Sprintf("/extractors/%s/versions", extractorID) + pagination.QueryString()
 	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
@@ -89,5 +91,5 @@ func (c *Client) ListExtractorVersions(ctx context.Context, extractorID string) 
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return result.Data, nil
+	return &result, nil
 }
