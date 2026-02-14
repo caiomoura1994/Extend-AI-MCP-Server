@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -17,15 +17,54 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get next version
+        id: version
+        run: |
+          # Get latest tag, default to v0.0.0 if none
+          LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST"
+
+          # Strip 'v' prefix and split into parts
+          VERSION="${LATEST#v}"
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+
+          # Bump patch
+          PATCH=$((PATCH + 1))
+          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT"
+          echo "tag=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "npm_version=${NEXT#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release needed
+        id: check
+        run: |
+          # Skip if HEAD already has a tag
+          if git describe --exact-match HEAD 2>/dev/null; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin ${{ steps.version.outputs.tag }}
+
       - name: Set up Go
+        if: steps.check.outputs.skip != 'true'
         uses: actions/setup-go@v5
         with:
           go-version: "1.23"
 
       - name: Run tests
+        if: steps.check.outputs.skip != 'true'
         run: go test ./...
 
       - name: Run GoReleaser
+        if: steps.check.outputs.skip != 'true'
         uses: goreleaser/goreleaser-action@v6
         with:
           version: "~> v2"
@@ -33,8 +72,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    outputs:
+      skip: ${{ steps.check.outputs.skip }}
+      npm_version: ${{ steps.version.outputs.npm_version }}
+
   publish-npm:
     needs: release
+    if: needs.release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,9 +90,9 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Set npm package version from tag
+      - name: Set npm package version
         working-directory: npm
-        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
+        run: npm version "${{ needs.release.outputs.npm_version }}" --no-git-tag-version --allow-same-version
 
       - name: Publish to npm
         working-directory: npm
