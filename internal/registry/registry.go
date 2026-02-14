@@ -134,6 +134,16 @@ func RegisterAllTools(server *mcp.Server, cfg *config.Config, extendClient *clie
 		toolCount++
 	}
 
+	// Register File tools (read-only)
+	if isCategoryEnabled(cfg, CategoryFiles) {
+		mcp.AddTool(server, &mcp.Tool{
+			Name:        "list_files",
+			Description: "List all files uploaded to the account",
+			InputSchema: json.RawMessage(`{"type": "object"}`),
+		}, fileHandlers.HandleListFiles)
+		toolCount++
+	}
+
 	return toolCount
 }
 
@@ -151,6 +161,9 @@ func LogServerInfo(cfg *config.Config, toolCount int) {
 	}
 	if cfg.EnableExtractors {
 		enabledCategories = append(enabledCategories, "extractors")
+	}
+	if cfg.EnableFiles {
+		enabledCategories = append(enabledCategories, "files")
 	}
 
 	fmt.Fprintf(os.Stderr, "Extend AI MCP Server starting...\n")
