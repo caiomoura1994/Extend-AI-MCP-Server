@@ -1,0 +1,28 @@
+{
+  "name": "extend-ai-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Extend AI document processing (unofficial). Downloads and runs the pre-built binary automatically.",
+  "bin": {
+    "extend-ai-mcp-server": "./run.js"
+  },
+  "files": [
+    "run.js"
+  ],
+  "keywords": [
+    "mcp",
+    "extend-ai",
+    "model-context-protocol",
+    "claude",
+    "cursor",
+    "ai",
+    "document-processing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caiomoura1994/Extend-AI-MCP-Server"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

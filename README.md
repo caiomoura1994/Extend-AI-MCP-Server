@@ -35,23 +35,11 @@ All operations are **read-only** -- this server cannot create, modify, or delete
 
 ## Quick Start
 
-### Prerequisites
+You only need **Node.js 18+** (which you probably already have) and an [Extend AI API key](https://extend.ai).
 
-- [Go 1.23+](https://go.dev/dl/)
-- An Extend AI API key ([get one here](https://extend.ai))
-- An MCP-compatible client (Claude Desktop, Cursor, etc.)
+### Claude Desktop
 
-### Build
-
-```bash
-git clone https://github.com/caiomoura/extend-mcp-server.git
-cd extend-mcp-server
-go build -o extend-mcp-server cmd/server/main.go
-```
-
-### Configure Claude Desktop
-
-Edit your Claude Desktop config:
+Edit your config file:
 
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -60,7 +48,8 @@ Edit your Claude Desktop config:
 {
   "mcpServers": {
     "extend-ai": {
-      "command": "/absolute/path/to/extend-mcp-server",
+      "command": "npx",
+      "args": ["-y", "extend-ai-mcp-server"],
       "env": {
         "EXTEND_API_KEY": "your_api_key_here"
       }
@@ -71,15 +60,16 @@ Edit your Claude Desktop config:
 
 Restart Claude Desktop after saving.
 
-### Configure Cursor
+### Cursor
 
-Add to your Cursor MCP settings (`.cursor/mcp.json`):
+Add to your project's `.cursor/mcp.json` or global Cursor MCP settings:
 
 ```json
 {
   "mcpServers": {
     "extend-ai": {
-      "command": "/absolute/path/to/extend-mcp-server",
+      "command": "npx",
+      "args": ["-y", "extend-ai-mcp-server"],
       "env": {
         "EXTEND_API_KEY": "your_api_key_here"
       }
@@ -88,9 +78,136 @@ Add to your Cursor MCP settings (`.cursor/mcp.json`):
 }
 ```
 
+### Other MCP Clients
+
+Any MCP client that supports stdio transport can use this server:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "extend-ai-mcp-server"],
+  "env": { "EXTEND_API_KEY": "your_api_key_here" }
+}
+```
+
+> **How it works:** `npx` automatically downloads a thin wrapper that fetches the correct pre-built binary for your OS on first run. The binary is cached at `~/.extend-mcp-server/`, so subsequent starts are instant.
+
+## Alternative Installation Methods
+
+<details>
+<summary><strong>Using <code>go run</code> (requires Go 1.23+)</strong></summary>
+
+If you have Go installed, you can skip npm entirely:
+
+```json
+{
+  "mcpServers": {
+    "extend-ai": {
+      "command": "go",
+      "args": ["run", "github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest"],
+      "env": {
+        "EXTEND_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Go downloads and compiles the server automatically. The build is cached, so subsequent starts are fast.
+
+</details>
+
+<details>
+<summary><strong>Pre-built binary (no Node.js or Go required)</strong></summary>
+
+Download the latest binary for your platform from [GitHub Releases](https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases):
+
+**macOS (Apple Silicon):**
+
+```bash
+curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_darwin_arm64.tar.gz
+tar xzf extend-mcp-server.tar.gz
+sudo mv extend-mcp-server /usr/local/bin/
+rm extend-mcp-server.tar.gz
+```
+
+**macOS (Intel):**
+
+```bash
+curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_darwin_amd64.tar.gz
+tar xzf extend-mcp-server.tar.gz
+sudo mv extend-mcp-server /usr/local/bin/
+rm extend-mcp-server.tar.gz
+```
+
+**Linux (x86_64):**
+
+```bash
+curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_linux_amd64.tar.gz
+tar xzf extend-mcp-server.tar.gz
+sudo mv extend-mcp-server /usr/local/bin/
+rm extend-mcp-server.tar.gz
+```
+
+**Linux (ARM64):**
+
+```bash
+curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_linux_arm64.tar.gz
+tar xzf extend-mcp-server.tar.gz
+sudo mv extend-mcp-server /usr/local/bin/
+rm extend-mcp-server.tar.gz
+```
+
+**Windows (x86_64):**
+
+1. Download [extend-mcp-server_windows_amd64.zip](https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_windows_amd64.zip)
+2. Extract `extend-mcp-server.exe`
+3. Move it to a directory in your PATH (e.g. `C:\Program Files\extend-mcp-server\`)
+
+Then use the binary directly in your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "extend-ai": {
+      "command": "/usr/local/bin/extend-mcp-server",
+      "env": {
+        "EXTEND_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+> On Windows use `"C:\\Program Files\\extend-mcp-server\\extend-mcp-server.exe"` as the command.
+
+</details>
+
+<details>
+<summary><strong>Install with <code>go install</code></strong></summary>
+
+```bash
+go install github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest
+```
+
+The binary is placed in `$(go env GOPATH)/bin/`. Then use `"command": "extend-mcp-server"` in your MCP config (if the Go bin directory is in your PATH).
+
+</details>
+
+<details>
+<summary><strong>Build from source</strong></summary>
+
+```bash
+git clone https://github.com/caiomoura1994/Extend-AI-MCP-Server.git
+cd Extend-AI-MCP-Server
+go build -o extend-mcp-server ./cmd/extend-mcp-server/
+```
+
+</details>
+
 ## Configuration
 
-All configuration is done via environment variables:
+All configuration is done via environment variables passed through your MCP client config:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
@@ -100,211 +217,36 @@ All configuration is done via environment variables:
 
 ### Regional Endpoints
 
-If your Extend AI account is on a regional instance (e.g. US2), set the base URL accordingly:
+If your Extend AI account is on a regional instance (e.g. US2), set the base URL:
 
-```bash
-EXTEND_BASE_URL=https://api.us2.extend.app
+```json
+{
+  "mcpServers": {
+    "extend-ai": {
+      "command": "extend-mcp-server",
+      "env": {
+        "EXTEND_API_KEY": "your_api_key_here",
+        "EXTEND_BASE_URL": "https://api.us2.extend.app"
+      }
+    }
+  }
+}
 ```
-
-## Architecture
-
-The project follows a **Clean Architecture** (Layered Architecture) pattern with clear separation of concerns:
-
-```
-extend-mcp-server/
-├── cmd/
-│   └── server/
-│       └── main.go                 # Entry point: loads config, creates client, starts server
-├── internal/
-│   ├── dto/                        # Data Transfer Objects (pure data types, no logic)
-│   │   ├── processors.go           # Processor, ProcessorRun, response wrappers
-│   │   ├── workflows.go            # Workflow, WorkflowRun, WorkflowRunSummary
-│   │   ├── extractors.go           # Extractor, ExtractorVersion, ExtractRun
-│   │   ├── parse.go                # ParserRun, ParserRunChunk, metrics
-│   │   └── files.go                # File, FileMetadata
-│   ├── repositories/               # Data access layer (HTTP client + API methods)
-│   │   ├── client.go               # HTTP client: auth, headers, error handling
-│   │   ├── processors.go           # GetProcessorRun, ListProcessors
-│   │   ├── workflows.go            # GetWorkflowRun, ListWorkflowRuns, ListWorkflows
-│   │   ├── extractors.go           # ListExtractRuns, GetExtractor, ListExtractors, etc.
-│   │   ├── parse.go                # GetParseRun
-│   │   └── files.go                # ListFiles
-│   ├── handlers/                   # MCP tool handlers (orchestrate repos + format responses)
-│   │   ├── processors.go           # Processor tool handlers
-│   │   ├── workflows.go            # Workflow tool handlers
-│   │   ├── extractors.go           # Extractor tool handlers
-│   │   ├── parse.go                # Parse tool handlers
-│   │   ├── files.go                # File tool handlers
-│   │   └── handlers_test.go        # Integration tests
-│   ├── registry/
-│   │   └── registry.go             # Tool registration and server startup logging
-│   └── config/
-│       └── config.go               # Environment variable configuration
-├── go.mod
-├── go.sum
-├── .env.example
-├── CLAUDE.md
-└── README.md
-```
-
-### Layer Dependencies
-
-```
-handlers  -->  repositories  -->  dto
-   |                |
-   +--- dto --------+
-```
-
-- **dto** - No dependencies. Pure structs that represent Extend AI API shapes.
-- **repositories** - Depends on `dto`. Contains the HTTP client and all API call methods.
-- **handlers** - Depends on `dto` and `repositories`. Validates input, calls repositories, formats MCP responses.
-- **registry** - Wires handlers to the MCP server based on configuration.
-
-## Development
-
-### Running Locally
-
-```bash
-export EXTEND_API_KEY=your_api_key_here
-go run cmd/server/main.go
-```
-
-The server communicates via stdio (standard input/output), which is the MCP transport protocol.
-
-### Testing with MCP Inspector
-
-```bash
-# Build the binary
-go build -o extend-mcp-server cmd/server/main.go
-
-# Run the MCP Inspector UI
-npx @modelcontextprotocol/inspector ./extend-mcp-server
-```
-
-This opens a web UI where you can list tools, call them, and inspect responses.
-
-### Running Tests
-
-```bash
-go test -v ./...
-```
-
-Tests use in-memory MCP transports to validate handler behavior without hitting the real API.
-
-## Contributing
-
-Contributions are welcome! Here's how you can help:
-
-### Getting Started
-
-1. **Fork** the repository
-2. **Clone** your fork:
-   ```bash
-   git clone https://github.com/your-username/extend-mcp-server.git
-   cd extend-mcp-server
-   ```
-3. **Create a branch** for your feature:
-   ```bash
-   git checkout -b feat/my-feature
-   ```
-4. **Make your changes** and ensure they build:
-   ```bash
-   go build ./...
-   go test ./...
-   ```
-5. **Commit** with a conventional commit message:
-   ```bash
-   git commit -m "feat: add support for document uploads"
-   ```
-6. **Push** and open a **Pull Request**
-
-### Commit Convention
-
-We use [Conventional Commits](https://www.conventionalcommits.org/):
-
-- `feat:` - New feature (e.g. new tool, new endpoint)
-- `fix:` - Bug fix
-- `refactor:` - Code restructuring without behavior change
-- `docs:` - Documentation changes
-- `test:` - Adding or updating tests
-- `chore:` - Maintenance tasks (deps, CI, etc.)
-
-### Adding a New Tool
-
-1. **Define the DTO** in `internal/dto/<domain>.go` if new types are needed:
-   ```go
-   type MyResource struct {
-       ID   string `json:"id"`
-       Name string `json:"name"`
-   }
-   ```
-
-2. **Add the repository method** in `internal/repositories/<domain>.go`:
-   ```go
-   func (c *Client) GetMyResource(ctx context.Context, id string) (*dto.MyResource, error) {
-       path := fmt.Sprintf("/my_resources/%s", id)
-       resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
-       if err != nil {
-           return nil, err
-       }
-       defer resp.Body.Close()
-
-       var result dto.MyResource
-       if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-           return nil, fmt.Errorf("failed to decode response: %w", err)
-       }
-       return &result, nil
-   }
-   ```
-
-3. **Create the handler** in `internal/handlers/<domain>.go`:
-   ```go
-   func (h *MyHandlers) HandleGetMyResource(ctx context.Context, req *mcp.CallToolRequest, input GetMyResourceInput) (*mcp.CallToolResult, *dto.MyResource, error) {
-       if input.ID == "" {
-           return nil, nil, fmt.Errorf("id is required")
-       }
-       result, err := h.client.GetMyResource(ctx, input.ID)
-       if err != nil {
-           return nil, nil, fmt.Errorf("failed to get resource: %w", err)
-       }
-       return nil, result, nil
-   }
-   ```
-
-4. **Register the tool** in `internal/registry/registry.go`:
-   ```go
-   mcp.AddTool(server, &mcp.Tool{
-       Name:        "get_my_resource",
-       Description: "Get details of a specific resource",
-   }, myHandlers.HandleGetMyResource)
-   ```
-
-5. **Add tests** in `internal/handlers/handlers_test.go`
-
-### Important Guidelines
-
-- **Read-only only**: This server intentionally exposes only read operations (GET/LIST). Do not add tools that create, modify, or delete resources.
-- **Error handling**: Always return `(nil, nil, fmt.Errorf(...))` for errors in handlers, never `(*mcp.CallToolResult{IsError: true}, nil, nil)`. This avoids an MCP SDK output validation bug with nil slices.
-- **Non-nil slices**: For list handlers, always ensure slices are non-nil before returning (use `if result == nil { result = []dto.Type{} }`). The MCP SDK rejects JSON `null` where an array is expected.
-- **Tests**: Run `go test ./...` before submitting. Add tests for new tools.
-
-### Ideas for Contributions
-
-- Add pagination support for list endpoints
-- Add filtering/search parameters to list tools
-- Improve error messages with more context
-- Add more detailed tool descriptions for better AI understanding
-- Add support for new Extend AI API endpoints as they are released
 
 ## Troubleshooting
 
 | Problem | Solution |
 |---|---|
-| Server won't start | Check that `EXTEND_API_KEY` is set |
+| `command not found` | Use the full path to the binary, or move it to a directory in your PATH |
+| Server won't start | Check that `EXTEND_API_KEY` is set in your MCP client config |
 | Tools not appearing | Restart your MCP client after config changes |
 | 404 API errors | Check `EXTEND_BASE_URL` matches your regional instance |
 | 401 API errors | Verify your API key is valid and active |
 | Endpoint not found | Check `EXTEND_API_VERSION` matches available endpoints |
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, architecture overview, and guidelines.
 
 ## Links
 

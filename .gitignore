@@ -1,5 +1,6 @@
 # Binaries
 extend-mcp-server
+dist/
 *.exe
 *.exe~
 *.dll
