@@ -33,144 +33,105 @@ All operations are **read-only** -- this server cannot create, modify, or delete
 | **Parse** | `get_parse_run` | Get the result of a parse operation |
 | **Files** | `list_files` | List all files uploaded to the account |
 
-## Quick Start
+## Installation
 
-You only need **Node.js 18+** (which you probably already have) and an [Extend AI API key](https://extend.ai).
+Choose one of the three options below. After installing, jump to [Setup](#setup) to configure your MCP client.
 
-### Claude Desktop
+### Option 1: npx (recommended)
 
-Edit your config file:
+Requires [Node.js 18+](https://nodejs.org/). No install step -- runs directly:
 
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "extend-ai": {
-      "command": "npx",
-      "args": ["-y", "extend-ai-mcp-server"],
-      "env": {
-        "EXTEND_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
+```
+npx -y extend-ai-mcp-server
 ```
 
-Restart Claude Desktop after saving.
+> On first run, it downloads the correct binary for your OS and caches it at `~/.extend-mcp-server/`. Subsequent runs start instantly.
 
-### Cursor
+### Option 2: Go
 
-Add to your project's `.cursor/mcp.json` or global Cursor MCP settings:
+Requires [Go 1.23+](https://go.dev/dl/). Also runs directly, no install step:
 
-```json
-{
-  "mcpServers": {
-    "extend-ai": {
-      "command": "npx",
-      "args": ["-y", "extend-ai-mcp-server"],
-      "env": {
-        "EXTEND_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
+```
+go run github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest
 ```
 
-### Other MCP Clients
+> Go downloads and compiles the server automatically. The build is cached for fast subsequent starts.
 
-Any MCP client that supports stdio transport can use this server:
+### Option 3: Pre-built binary
 
-```json
-{
-  "command": "npx",
-  "args": ["-y", "extend-ai-mcp-server"],
-  "env": { "EXTEND_API_KEY": "your_api_key_here" }
-}
-```
-
-> **How it works:** `npx` automatically downloads a thin wrapper that fetches the correct pre-built binary for your OS on first run. The binary is cached at `~/.extend-mcp-server/`, so subsequent starts are instant.
-
-## Alternative Installation Methods
+No runtime dependencies. Download from [GitHub Releases](https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases):
 
 <details>
-<summary><strong>Using <code>go run</code> (requires Go 1.23+)</strong></summary>
+<summary>macOS (Apple Silicon)</summary>
 
-If you have Go installed, you can skip npm entirely:
-
-```json
-{
-  "mcpServers": {
-    "extend-ai": {
-      "command": "go",
-      "args": ["run", "github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest"],
-      "env": {
-        "EXTEND_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
+```bash
+curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_darwin_arm64.tar.gz
+tar xzf extend-mcp-server.tar.gz && rm extend-mcp-server.tar.gz
+sudo mv extend-mcp-server /usr/local/bin/
 ```
-
-Go downloads and compiles the server automatically. The build is cached, so subsequent starts are fast.
 
 </details>
 
 <details>
-<summary><strong>Pre-built binary (no Node.js or Go required)</strong></summary>
-
-Download the latest binary for your platform from [GitHub Releases](https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases):
-
-**macOS (Apple Silicon):**
-
-```bash
-curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_darwin_arm64.tar.gz
-tar xzf extend-mcp-server.tar.gz
-sudo mv extend-mcp-server /usr/local/bin/
-rm extend-mcp-server.tar.gz
-```
-
-**macOS (Intel):**
+<summary>macOS (Intel)</summary>
 
 ```bash
 curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_darwin_amd64.tar.gz
-tar xzf extend-mcp-server.tar.gz
+tar xzf extend-mcp-server.tar.gz && rm extend-mcp-server.tar.gz
 sudo mv extend-mcp-server /usr/local/bin/
-rm extend-mcp-server.tar.gz
 ```
 
-**Linux (x86_64):**
+</details>
+
+<details>
+<summary>Linux (x86_64)</summary>
 
 ```bash
 curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_linux_amd64.tar.gz
-tar xzf extend-mcp-server.tar.gz
+tar xzf extend-mcp-server.tar.gz && rm extend-mcp-server.tar.gz
 sudo mv extend-mcp-server /usr/local/bin/
-rm extend-mcp-server.tar.gz
 ```
 
-**Linux (ARM64):**
+</details>
+
+<details>
+<summary>Linux (ARM64)</summary>
 
 ```bash
 curl -Lo extend-mcp-server.tar.gz https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_linux_arm64.tar.gz
-tar xzf extend-mcp-server.tar.gz
+tar xzf extend-mcp-server.tar.gz && rm extend-mcp-server.tar.gz
 sudo mv extend-mcp-server /usr/local/bin/
-rm extend-mcp-server.tar.gz
 ```
 
-**Windows (x86_64):**
+</details>
+
+<details>
+<summary>Windows (x86_64)</summary>
 
 1. Download [extend-mcp-server_windows_amd64.zip](https://github.com/caiomoura1994/Extend-AI-MCP-Server/releases/latest/download/extend-mcp-server_windows_amd64.zip)
 2. Extract `extend-mcp-server.exe`
 3. Move it to a directory in your PATH (e.g. `C:\Program Files\extend-mcp-server\`)
 
-Then use the binary directly in your MCP config:
+</details>
+
+## Setup
+
+Add the following to your MCP client config. Replace the `command` and `args` depending on which installation option you chose:
+
+| Installation | `command` | `args` |
+|---|---|---|
+| **npx** | `"npx"` | `["-y", "extend-ai-mcp-server"]` |
+| **Go** | `"go"` | `["run", "github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest"]` |
+| **Binary** | `"/usr/local/bin/extend-mcp-server"` | not needed |
+
+Example using npx:
 
 ```json
 {
   "mcpServers": {
     "extend-ai": {
-      "command": "/usr/local/bin/extend-mcp-server",
+      "command": "npx",
+      "args": ["-y", "extend-ai-mcp-server"],
       "env": {
         "EXTEND_API_KEY": "your_api_key_here"
       }
@@ -179,35 +140,19 @@ Then use the binary directly in your MCP config:
 }
 ```
 
-> On Windows use `"C:\\Program Files\\extend-mcp-server\\extend-mcp-server.exe"` as the command.
+Where to put this config:
 
-</details>
+| Client | Config file |
+|---|---|
+| **Claude Desktop** (macOS) | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Claude Desktop** (Windows) | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Cursor** | `.cursor/mcp.json` in your project, or global Cursor MCP settings |
 
-<details>
-<summary><strong>Install with <code>go install</code></strong></summary>
-
-```bash
-go install github.com/caiomoura/extend-mcp-server/cmd/extend-mcp-server@latest
-```
-
-The binary is placed in `$(go env GOPATH)/bin/`. Then use `"command": "extend-mcp-server"` in your MCP config (if the Go bin directory is in your PATH).
-
-</details>
-
-<details>
-<summary><strong>Build from source</strong></summary>
-
-```bash
-git clone https://github.com/caiomoura1994/Extend-AI-MCP-Server.git
-cd Extend-AI-MCP-Server
-go build -o extend-mcp-server ./cmd/extend-mcp-server/
-```
-
-</details>
+Restart your MCP client after saving.
 
 ## Configuration
 
-All configuration is done via environment variables passed through your MCP client config:
+All configuration is done via environment variables in the `env` block of your MCP config:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
@@ -217,19 +162,12 @@ All configuration is done via environment variables passed through your MCP clie
 
 ### Regional Endpoints
 
-If your Extend AI account is on a regional instance (e.g. US2), set the base URL:
+If your Extend AI account is on a regional instance (e.g. US2), add `EXTEND_BASE_URL` to the `env` block:
 
 ```json
-{
-  "mcpServers": {
-    "extend-ai": {
-      "command": "extend-mcp-server",
-      "env": {
-        "EXTEND_API_KEY": "your_api_key_here",
-        "EXTEND_BASE_URL": "https://api.us2.extend.app"
-      }
-    }
-  }
+"env": {
+  "EXTEND_API_KEY": "your_api_key_here",
+  "EXTEND_BASE_URL": "https://api.us2.extend.app"
 }
 ```
 
@@ -237,7 +175,7 @@ If your Extend AI account is on a regional instance (e.g. US2), set the base URL
 
 | Problem | Solution |
 |---|---|
-| `command not found` | Use the full path to the binary, or move it to a directory in your PATH |
+| `command not found` | Use the full path to the binary, or ensure Node.js/Go is in your PATH |
 | Server won't start | Check that `EXTEND_API_KEY` is set in your MCP client config |
 | Tools not appearing | Restart your MCP client after config changes |
 | 404 API errors | Check `EXTEND_BASE_URL` matches your regional instance |
