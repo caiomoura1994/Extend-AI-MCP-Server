@@ -28,8 +28,8 @@ func main() {
 	}
 	server := mcp.NewServer(impl, nil)
 
-	// Register all tools based on configuration
-	toolCount := registry.RegisterAllTools(server, cfg, extendClient)
+	// Register all tools
+	toolCount := registry.RegisterAllTools(server, extendClient)
 
 	// Log server startup information
 	registry.LogServerInfo(cfg, toolCount)

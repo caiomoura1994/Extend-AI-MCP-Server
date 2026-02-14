@@ -97,11 +97,6 @@ All configuration is done via environment variables:
 | `EXTEND_API_KEY` | Yes | - | Your Extend AI API key |
 | `EXTEND_API_VERSION` | No | `2026-02-09` | Extend AI API version |
 | `EXTEND_BASE_URL` | No | `https://api.extend.ai` | Extend AI API base URL |
-| `EXTEND_ENABLE_PROCESSORS` | No | `true` | Enable processor tools |
-| `EXTEND_ENABLE_WORKFLOWS` | No | `true` | Enable workflow tools |
-| `EXTEND_ENABLE_PARSE` | No | `true` | Enable parse tools |
-| `EXTEND_ENABLE_EXTRACTORS` | No | `true` | Enable extractor tools |
-| `EXTEND_ENABLE_FILES` | No | `true` | Enable file tools |
 
 ### Regional Endpoints
 
@@ -109,19 +104,6 @@ If your Extend AI account is on a regional instance (e.g. US2), set the base URL
 
 ```bash
 EXTEND_BASE_URL=https://api.us2.extend.app
-```
-
-### Selective Tool Registration
-
-You can enable only the tool categories you need:
-
-```bash
-# Only extractors and files
-EXTEND_ENABLE_PROCESSORS=false
-EXTEND_ENABLE_WORKFLOWS=false
-EXTEND_ENABLE_PARSE=false
-EXTEND_ENABLE_EXTRACTORS=true
-EXTEND_ENABLE_FILES=true
 ```
 
 ## Architecture
