@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/caiomoura/extend-mcp-server/internal/dto"
 	"github.com/caiomoura/extend-mcp-server/internal/repositories"
@@ -21,10 +22,17 @@ func NewExtractorHandlers(c *repositories.Client) *ExtractorHandlers {
 
 // ListExtractRunsInput defines the input schema for list_extract_runs tool
 type ListExtractRunsInput struct {
-	MaxPageSize   *int    `json:"max_page_size,omitempty" jsonschema:"Maximum number of items per page (default: 10)"`
-	NextPageToken *string `json:"next_page_token,omitempty" jsonschema:"Token for the next page of results"`
-	SortBy        *string `json:"sort_by,omitempty" jsonschema:"Sort by field: updatedAt or createdAt (default: updatedAt)"`
-	SortDir       *string `json:"sort_dir,omitempty" jsonschema:"Sort direction: asc or desc (default: desc)"`
+	MaxPageSize      *int    `json:"max_page_size,omitempty" jsonschema:"Maximum number of items per page (default: 10). Ignored when date filters are used."`
+	NextPageToken    *string `json:"next_page_token,omitempty" jsonschema:"Token for the next page of results. Pass the value from a previous response to get the next page. Ignored when date filters are used."`
+	SortBy           *string `json:"sort_by,omitempty" jsonschema:"Sort by field: updatedAt or createdAt (default: updatedAt). Forced to createdAt when date filters are used."`
+	SortDir          *string `json:"sort_dir,omitempty" jsonschema:"Sort direction: asc or desc (default: desc). Forced to desc when date filters are used."`
+	Status           *string `json:"status,omitempty" jsonschema:"Filter by status: PROCESSING, PROCESSED, FAILED, or CANCELLED"`
+	ExtractorID      *string `json:"extractor_id,omitempty" jsonschema:"Filter by extractor ID"`
+	Source           *string `json:"source,omitempty" jsonschema:"Filter by source: API, WORKFLOW_RUN, STUDIO, ADMIN, BATCH_PROCESSOR_RUN, PLAYGROUND, or WORKFLOW_CONFIGURATION"`
+	SourceID         *string `json:"source_id,omitempty" jsonschema:"Filter by source ID"`
+	FileNameContains *string `json:"file_name_contains,omitempty" jsonschema:"Filter runs where the file name contains this string"`
+	CreatedAfter     *string `json:"created_after,omitempty" jsonschema:"Return only runs created after this date (RFC 3339 format, e.g. 2026-02-17T00:00:00Z). Enables auto-pagination to collect all matching results."`
+	CreatedBefore    *string `json:"created_before,omitempty" jsonschema:"Return only runs created before this date (RFC 3339 format, e.g. 2026-02-18T00:00:00Z). Enables auto-pagination to collect all matching results."`
 }
 
 // ListExtractRunsOutput wraps the extract runs list with pagination
@@ -35,6 +43,67 @@ type ListExtractRunsOutput struct {
 
 // HandleListExtractRuns handles the list_extract_runs tool call
 func (h *ExtractorHandlers) HandleListExtractRuns(ctx context.Context, req *mcp.CallToolRequest, input ListExtractRunsInput) (*mcp.CallToolResult, *ListExtractRunsOutput, error) {
+	filters := &dto.ExtractRunFilters{
+		Status:           input.Status,
+		ExtractorID:      input.ExtractorID,
+		Source:           input.Source,
+		SourceID:         input.SourceID,
+		FileNameContains: input.FileNameContains,
+	}
+
+	// Parse optional date filters
+	createdAfter, err := ParseOptionalTime(input.CreatedAfter)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid created_after: %w", err)
+	}
+	createdBefore, err := ParseOptionalTime(input.CreatedBefore)
+	if err != nil {
+		return nil, nil, fmt.Errorf("invalid created_before: %w", err)
+	}
+
+	dateParams := DateFilterParams{
+		CreatedAfter:  createdAfter,
+		CreatedBefore: createdBefore,
+	}
+
+	// When date filters are active, auto-paginate and collect all matching results
+	if dateParams.HasDateFilter() {
+		sortBy := "createdAt"
+		sortDir := "desc"
+		pageSize := autoPageSize
+
+		fetcher := func(ctx context.Context, token *string) ([]dto.ExtractRun, *string, error) {
+			pagination := &dto.PaginationParams{
+				MaxPageSize:   &pageSize,
+				NextPageToken: token,
+				SortBy:        &sortBy,
+				SortDir:       &sortDir,
+			}
+			result, err := h.client.ListExtractRuns(ctx, pagination, filters)
+			if err != nil {
+				return nil, nil, err
+			}
+			if result.Data == nil {
+				result.Data = []dto.ExtractRun{}
+			}
+			return result.Data, result.NextPageToken, nil
+		}
+
+		runs, err := FetchWithDateFilter(ctx, dateParams, fetcher, func(r dto.ExtractRun) time.Time {
+			return r.CreatedAt
+		})
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to list extract runs with date filter: %w", err)
+		}
+		if runs == nil {
+			runs = []dto.ExtractRun{}
+		}
+		return nil, &ListExtractRunsOutput{
+			ExtractRuns: runs,
+		}, nil
+	}
+
+	// Normal single-page path (no date filter)
 	pagination := &dto.PaginationParams{
 		MaxPageSize:   input.MaxPageSize,
 		NextPageToken: input.NextPageToken,
@@ -42,7 +111,7 @@ func (h *ExtractorHandlers) HandleListExtractRuns(ctx context.Context, req *mcp.
 		SortDir:       input.SortDir,
 	}
 
-	result, err := h.client.ListExtractRuns(ctx, pagination)
+	result, err := h.client.ListExtractRuns(ctx, pagination, filters)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to list extract runs: %w", err)
 	}

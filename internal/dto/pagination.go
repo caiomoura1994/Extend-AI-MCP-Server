@@ -13,13 +13,12 @@ type PaginationParams struct {
 	SortDir       *string `json:"sort_dir,omitempty"` // "asc" or "desc"
 }
 
-// QueryString builds URL query parameters from the pagination params
-func (p *PaginationParams) QueryString() string {
-	if p == nil {
-		return ""
-	}
-
+// QueryValues returns url.Values for the pagination params
+func (p *PaginationParams) QueryValues() url.Values {
 	params := url.Values{}
+	if p == nil {
+		return params
+	}
 
 	if p.MaxPageSize != nil {
 		params.Set("maxPageSize", fmt.Sprintf("%d", *p.MaxPageSize))
@@ -34,7 +33,26 @@ func (p *PaginationParams) QueryString() string {
 		params.Set("sortDir", *p.SortDir)
 	}
 
-	encoded := params.Encode()
+	return params
+}
+
+// QueryString builds URL query parameters from the pagination params
+func (p *PaginationParams) QueryString() string {
+	return BuildQueryString(p.QueryValues())
+}
+
+// BuildQueryString merges multiple url.Values into a single query string
+func BuildQueryString(parts ...url.Values) string {
+	merged := url.Values{}
+	for _, part := range parts {
+		for key, values := range part {
+			for _, v := range values {
+				merged.Set(key, v)
+			}
+		}
+	}
+
+	encoded := merged.Encode()
 	if encoded == "" {
 		return ""
 	}

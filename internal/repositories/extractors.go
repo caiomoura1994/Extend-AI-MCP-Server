@@ -9,9 +9,9 @@ import (
 	"github.com/caiomoura/extend-mcp-server/internal/dto"
 )
 
-// ListExtractRuns retrieves extract runs with optional pagination
-func (c *Client) ListExtractRuns(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListExtractRunsResponse, error) {
-	path := "/extract_runs" + pagination.QueryString()
+// ListExtractRuns retrieves extract runs with optional pagination and filters
+func (c *Client) ListExtractRuns(ctx context.Context, pagination *dto.PaginationParams, filters *dto.ExtractRunFilters) (*dto.ListExtractRunsResponse, error) {
+	path := "/extract_runs" + dto.BuildQueryString(pagination.QueryValues(), filters.QueryValues())
 	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err

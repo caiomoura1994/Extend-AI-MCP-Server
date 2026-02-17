@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	"net/url"
+	"time"
+)
 
 // Workflow represents a workflow configuration
 type Workflow struct {
@@ -42,6 +45,35 @@ type WorkflowStep struct {
 	EndedAt   time.Time              `json:"endedAt,omitempty"`
 }
 
+// WorkflowRunFilters represents optional filter parameters for listing workflow runs
+type WorkflowRunFilters struct {
+	Status           *string `json:"status,omitempty"`
+	WorkflowID       *string `json:"workflow_id,omitempty"`
+	BatchID          *string `json:"batch_id,omitempty"`
+	FileNameContains *string `json:"file_name_contains,omitempty"`
+}
+
+// QueryValues returns url.Values for the workflow run filters
+func (f *WorkflowRunFilters) QueryValues() url.Values {
+	params := url.Values{}
+	if f == nil {
+		return params
+	}
+	if f.Status != nil && *f.Status != "" {
+		params.Set("status", *f.Status)
+	}
+	if f.WorkflowID != nil && *f.WorkflowID != "" {
+		params.Set("workflowId", *f.WorkflowID)
+	}
+	if f.BatchID != nil && *f.BatchID != "" {
+		params.Set("batchId", *f.BatchID)
+	}
+	if f.FileNameContains != nil && *f.FileNameContains != "" {
+		params.Set("fileNameContains", *f.FileNameContains)
+	}
+	return params
+}
+
 // WorkflowRunSummary represents a workflow run summary (GET /workflow_runs)
 type WorkflowRunSummary struct {
 	ID                string                 `json:"id"`
@@ -56,6 +88,7 @@ type WorkflowRunSummary struct {
 	WorkflowVersionID string                 `json:"workflowVersionId"`
 	BatchID           string                 `json:"batchId,omitempty"`
 	RejectionNote     string                 `json:"rejectionNote,omitempty"`
+	DashboardURL      string                 `json:"dashboardUrl,omitempty"`
 	CreatedAt         time.Time              `json:"createdAt"`
 	UpdatedAt         time.Time              `json:"updatedAt"`
 	Usage             map[string]interface{} `json:"usage,omitempty"`

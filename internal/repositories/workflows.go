@@ -26,9 +26,9 @@ func (c *Client) GetWorkflowRun(ctx context.Context, runID string) (*dto.Workflo
 	return &result, nil
 }
 
-// ListWorkflowRuns retrieves workflow runs with optional pagination
-func (c *Client) ListWorkflowRuns(ctx context.Context, pagination *dto.PaginationParams) (*dto.ListWorkflowRunsResponse, error) {
-	path := "/workflow_runs" + pagination.QueryString()
+// ListWorkflowRuns retrieves workflow runs with optional pagination and filters
+func (c *Client) ListWorkflowRuns(ctx context.Context, pagination *dto.PaginationParams, filters *dto.WorkflowRunFilters) (*dto.ListWorkflowRunsResponse, error) {
+	path := "/workflow_runs" + dto.BuildQueryString(pagination.QueryValues(), filters.QueryValues())
 	resp, err := c.doRequest(ctx, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, err
